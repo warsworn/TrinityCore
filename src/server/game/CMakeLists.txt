@@ -5,7 +5,7 @@
 # modifications, as long as this notice is preserved.
 #
 # This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# WITHOUT ANY WARRANTY; to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 CollectSourceFiles(
@@ -49,11 +49,12 @@ add_library(game
   )
 
 # tswow-begin
+# Use unquoted define values to avoid MSVC D8000 command-line errors
 target_compile_definitions(game PRIVATE
-  $<$<CONFIG:Debug>:LIVESCRIPT_BUILD_TYPE=\"Debug\">
-  $<$<CONFIG:Release>:LIVESCRIPT_BUILD_TYPE=\"Release\">
-  $<$<CONFIG:RelWithDebInfo>:LIVESCRIPT_BUILD_TYPE=\"RelWithDebInfo\">
-  $<$<CONFIG:MinSizeRel>:LIVESCRIPT_BUILD_TYPE=\"MinSizeRel\">
+  $<$<CONFIG:Debug>:LIVESCRIPT_BUILD_TYPE=Debug>
+  $<$<CONFIG:Release>:LIVESCRIPT_BUILD_TYPE=Release>
+  $<$<CONFIG:RelWithDebInfo>:LIVESCRIPT_BUILD_TYPE=RelWithDebInfo>
+  $<$<CONFIG:MinSizeRel>:LIVESCRIPT_BUILD_TYPE=MinSizeRel>
 )
 # tswow-end
 
@@ -63,9 +64,9 @@ target_include_directories(game
     # tswow-begin
     ${TSWOW_INCLUDES}
     ${LUA_ROOT}
-    ${sourcemap_SOURCE_DIR}/src
-    ${sourcemap_SOURCE_DIR}/deps/json
-    ${sourcemap_SOURCE_DIR}/deps/cencode
+    $<$<BOOL:${sourcemap_SOURCE_DIR}>:${sourcemap_SOURCE_DIR}/src>
+    $<$<BOOL:${sourcemap_SOURCE_DIR}>:${sourcemap_SOURCE_DIR}/deps/json>
+    $<$<BOOL:${sourcemap_SOURCE_DIR}>:${sourcemap_SOURCE_DIR}/deps/cencode>
     ${tracy_SOURCE_DIR}
     # tswow-end
     )

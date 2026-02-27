@@ -5,7 +5,7 @@
 # modifications, as long as this notice is preserved.
 #
 # This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# WITHOUT ANY WARRANTY; to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 cmake_minimum_required(VERSION 3.22)
