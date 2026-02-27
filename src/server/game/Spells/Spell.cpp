@@ -16,6 +16,7 @@
  */
 
 #include "Spell.h"
+#include <algorithm>
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -1209,6 +1210,63 @@ void Spell::SelectImplicitNearbyTargets(SpellEffectInfo const& spellEffectInfo, 
     SelectImplicitChainTargets(spellEffectInfo, targetType, target, effMask);
 }
 
+void Spell::ResizeTargetsByPriority(std::list<WorldObject*>& targets, uint32 maxTargets) const
+{
+    if (targets.empty() || maxTargets == 0)
+        return;
+    if (targets.size() <= maxTargets)
+        return;
+
+    // 1. Get caster's current selection (player selected unit or unit target)
+    Unit* selectedTarget = nullptr;
+    if (Unit* unitCaster = m_caster->ToUnit())
+    {
+        if (Player* player = unitCaster->ToPlayer())
+            selectedTarget = player->GetSelectedUnit();
+        else
+            selectedTarget = ObjectAccessor::GetUnit(*unitCaster, unitCaster->GetTarget());
+    }
+
+    std::list<WorldObject*> result;
+
+    // 2. If selection is in the target list, prioritize it first
+    if (selectedTarget)
+    {
+        auto it = std::find(targets.begin(), targets.end(), selectedTarget);
+        if (it != targets.end())
+        {
+            result.push_back(selectedTarget);
+            targets.erase(it);
+        }
+    }
+
+    uint32 needCount = maxTargets - result.size();
+    if (needCount == 0)
+    {
+        targets = std::move(result);
+        return;
+    }
+
+    // 3. Fill remaining slots: by distance to caster if available, else random
+    if (m_caster)
+    {
+        std::vector<WorldObject*> remaining(targets.begin(), targets.end());
+        std::sort(remaining.begin(), remaining.end(), [this](WorldObject* a, WorldObject* b) {
+            return m_caster->GetDistanceOrder(a, b, true);
+        });
+        for (size_t i = 0; i < needCount && i < remaining.size(); ++i)
+            result.push_back(remaining[i]);
+    }
+    else
+    {
+        Trinity::Containers::RandomResize(targets, needCount);
+        for (WorldObject* o : targets)
+            result.push_back(o);
+    }
+
+    targets = std::move(result);
+}
+
 void Spell::SelectImplicitConeTargets(SpellEffectInfo const& spellEffectInfo, SpellImplicitTargetInfo const& targetType, uint32 effMask)
 {
     if (targetType.GetReferenceType() != TARGET_REFERENCE_TYPE_CASTER)
@@ -1245,7 +1303,7 @@ void Spell::SelectImplicitConeTargets(SpellEffectInfo const& spellEffectInfo, Sp
             {
                 if (Unit* unitCaster = m_caster->ToUnit())
                     maxTargets += unitCaster->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, m_spellInfo);
-                Trinity::Containers::RandomResize(targets, maxTargets);
+                ResizeTargetsByPriority(targets, maxTargets);
             }
 
             for (WorldObject* itr : targets)
@@ -1331,7 +1389,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffectInfo const& spellEffectInfo, Sp
         {
             if (Unit* unitCaster = m_caster->ToUnit())
                 maxTargets += unitCaster->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, m_spellInfo);
-            Trinity::Containers::RandomResize(targets, maxTargets);
+            ResizeTargetsByPriority(targets, maxTargets);
         }
 
         for (WorldObject* itr : targets)

@@ -25716,7 +25716,7 @@ void Player::UnlockAchievement(uint32 entry)
     if (!achievement)
         return;
 
-    CompletedAchievement(achievement);
+    m_achievementMgr->CompletedAchievement(achievement, true);
 }
 // @tswow-end
 

@@ -1539,10 +1539,10 @@ void AchievementMgr::RemoveTimedAchievement(AchievementCriteriaTimedTypes type, 
     }
 }
 
-void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
+void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, bool fromScript)
 {
-    // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission
-    if (m_player->IsGameMaster() || m_player->GetSession()->HasPermission(rbac::RBAC_PERM_CANNOT_EARN_ACHIEVEMENTS))
+    // Disable for GameMasters with GM-mode enabled or for players that don't have the related RBAC permission (skip when unlocked from script)
+    if (!fromScript && (m_player->IsGameMaster() || m_player->GetSession()->HasPermission(rbac::RBAC_PERM_CANNOT_EARN_ACHIEVEMENTS)))
         return;
 
     if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement->ID))

@@ -282,7 +282,7 @@ class TC_GAME_API AchievementMgr
         void SaveToDB(CharacterDatabaseTransaction trans);
         void ResetAchievementCriteria(AchievementCriteriaCondition condition, uint32 value, bool evenIfCriteriaComplete);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, WorldObject* ref = nullptr);
-        void CompletedAchievement(AchievementEntry const* entry);
+        void CompletedAchievement(AchievementEntry const* entry, bool fromScript = false);
         void CheckAllAchievementCriteria();
         void SendAllAchievementData() const;
         void SendRespondInspectAchievements(Player* player) const;

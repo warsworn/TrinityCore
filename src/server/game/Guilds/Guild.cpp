@@ -41,7 +41,7 @@
 
 size_t const MAX_GUILD_BANK_TAB_TEXT_LEN = 500;
 
-uint32 const EMBLEM_PRICE = 10 * GOLD;
+uint32 const EMBLEM_PRICE = 0;
 
 // only used in logs
 char const* GetGuildEventString(GuildEvents event)
